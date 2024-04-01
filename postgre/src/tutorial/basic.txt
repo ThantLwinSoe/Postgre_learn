@@ -1,0 +1,3 @@
+insert table person ( "Soe Min",23);
+
+insert table person ( "Moe Han", 24);
