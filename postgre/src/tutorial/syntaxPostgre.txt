@@ -1,0 +1,252 @@
+# postgrep
+sudo su - postgres
+
+#postgre create user role
+postgres=# CREATE USER tls WITH PASSWORD 'root';
+
+#Connect the database
+psql -h localhost -p 5432 -U tls -W test;
+
+# Change User role in postgrep
+ALTER DATABASE test OWNER TO 'tls';
+
+# Create Table 
+CREATE TABLE person ( name varchar(80), age int);
+
+# Drop Table
+DROP TABLE person;
+
+# Check List of table
+\d
+
+# Check list detail of person table
+\d person
+
+# Create table with constraints
+CREATE TABLE person ( 
+id BIGSERIAL NOT NULL PRIMARY KEY,
+first_name VARCHAR(80) NOT NULL,
+last_name VARCHAR(80) NOT NULL,
+email VARCHAR(80) );
+
+# Insert data into table with key note
+INSERT INTO person ( first_name, last_name, gender, date_of_birth,email ) VALUES ( 'Alex', 'Hone', 'male', DATE '1999-01-10', 'alex@gmail.com');
+
+# Retriving Data from table
+SELECT first_name FROM person;
+SELECT * FROM person;
+SELECT first_name, date_of_birth FROM person;
+
+# Change Table name 
+ALTER TABLE mock_data RENAME TO person;
+
+ALTER TABLE IF EXISTS table_name
+RENAME TO new_table_name;
+
+# run command from file # Note: All folder and sub folder must have execute mode
+\i 'Path/of/the/file.sql'
+
+# Search data from table specify information
+SELECT * FROM person WHERE country_of_birth='Vietnam';
+
+# Sort Data by asceding 
+SELECT * FROM person ORDER BY country_of_birth ASC;
+
+# Sort Data by desceding 
+SELECT * FROM person ORDER BY country_of_birth DESC;'
+
+# Distinct Data from specify data (only 1 data from duplicated data)
+SELECT DISTINCT country_of_birth FROM person ORDER BY country_of_birth;
+
+# Filtering data using where and AND OR logic
+SELECT * FROM person WHERE country_of_birth='China' AND last_name='Postin';
+SELECT * FROM person WHERE country_of_birth='China' AND gender='Male';
+
+# Comparison Operator using on Postgre
+SELECT 1 > 1; # return false
+SELECT 1 <> 1; # return false <> mean not equal
+SELECT 1 >= 1; return true
+
+# Can use String using Comparison Operator
+SELECT 'THANT' <> 'thant';  # return true
+test=> SELECT 'thant' = 'thant'; # return 'true'
+
+# Can use data with limit 
+SELECT * FROM person LIMIT 5;
+
+# Can use data using offset and limit
+SELECT * FROM person OFFSET 5 LIMIT 10; # Offset mean < of data 
+SELECT * FROM person WHERE country_of_birth='Poland'AND gender='Bigender' ORDER BY id ASC;
+
+# Can use Fetch instant of limit 
+SELECT * FROM person OFFSET 10 FETCH FIRST 10 ROW ONLY; 
+
+# Can use instance of OR operator using in();
+SELECT * FROM person WHERE country_of_birth in('China','Poland') ORDER BY country_of_birth DESC;
+
+# Using Between key word by filtering data
+SELECT * FROM person WHERE date_of_birth BETWEEN DATE '2000-01-1' AND '2002-01-1';
+SELECT * FROM person WHERE id BETWEEN 55 AND 62;
+
+# Using Select Data from Specify using Like 
+SELECT * FROM person WHERE email LIKE '%@jimdo.com';
+
+# Select data like * instant of % 
+SELECT * FROM person WHERE country_of_birth LIKE 'P%';  # % is the * and '_' is the ? only one single character
+
+# SELECT data like casesensitive using ILIKE 
+SELECT * FROM person WHERE country_of_birth ILIKE 'c%';
+
+# DISTINCT instance of using GROUP BY
+SELECT gender FROM person GROUP BY gender;
+
+# Using Count() Function in the Quary
+SELECT gender, COUNT(*) FROM person GROUP BY gender;
+
+# Using Have from filter of COUNT of GROUP BY 
+SELECT gender, COUNT(*) FROM person GROUP BY gender HAVING COUNT(*) >19  ORDER BY gender;
+
+# You can search using MIN(price) and MAX(price) and SUM(price) and AVG(price) and ROUND(AVG(price))
+SELECT make, MIN(price) FROM car GROUP BY make;
+
+SELECT make, MIN(price) FROM car GROUP BY make;
+
+SELECT make, AVG(price) FROM car GROUP BY make;
+
+SELECT make, ROUND(AVG(price)) FROM car GROUP BY make;
+
+# Using SUM() sum of the price 
+SELECT make, SUM(price) FROM car GROUP BY make;
+
+# Can use Arithmetic Operation on postgrep table
+SELECT 10 + 5; 
+SELECT 10 - 5; 
+SELECT 10 / 5; 
+SELECT 10 % 5; 
+
+SELECT make,price, price * 2 FROM car;
+
+SELECT make,price, ROUND(price * 2,2) FROM car;
+
+SELECT make, price, ROUND( price * .10, 2 ), price - ROUND( price * .10, 2) FROM car;
+
+
+# Alias provided name any coloums that using As for temporary;
+
+SELECT make, price AS original_value, ROUND( price * .10, 2 ) AS ten_percent_value, ROUND(price - price * .10, 2) AS after_ten FROM car;
+
+# Null Handler by Coalesce() and Nullif()
+SELECT COALESCE( NULL, 9 , 12);
+SELECT COALESCE( 10 / NULLIF( 0,0 ) , 10);
+
+# Timestamps & Date can use now() function
+SELECT NOW();
+
+# Specify Timestamps without date
+SELECT NOW()::TIME;
+
+#Specify Date without timestamps
+SELECT NOW()::DATE;
+
+# Add and Substracting Date with Interval 
+SELECT NOW() - INTERVAL '1 year';
+
+# can specify Interval 'String '
+SELECT NOW() + INTERVAL '10 DAY';
+SELECT ( NOW() + INTERVAL '1 MONTH'):: DATE;
+
+# Sperate Data from TIMESTAMP using extract keyword
+SELECT EXTRACT( YEAR FROM ( NOW() - INTERVAL '10 YEAR'));
+
+# Can Calculate age from AGE( NOW() , date_of_birth) 
+SELECT first_name , date_of_birth , AGE( NOW() , date_of_birth)  As age FROM person;
+
+# Set Primary Key 
+ALTER TABLE person ADD PRIMARY KEY(ID);
+
+# Delete Primary Key
+ALTER TABLE person DROP CONSTRAINT mock_data_pkey;
+
+# Unquie KEY to Table 
+ALTER TABLE person ADD CONSTRAINT unquie_email UNIQUE(email);
+ALTER TABLE person ADD UNIQUE(email);
+
+# Delete Unique Key 
+ALTER TABLE person DROP CONSTRAINT unquie_email;
+
+# Coalesce can show if value is null can insert default value
+SELECT COALESCE(email,'email does not provided') FROM person;
+
+# CHECK column value is duplicated or not 
+ALTER TABLE person ADD CONSTRAINT unique_gender CHECK( gender = 'Male' OR gender = 'Female');
+
+
+# Handle dulplicate data by using ON CONFLICT(id) DO NOTHING;
+INSERT INTO person values( 6, 'hello', 'tls' , 'tls@gmail.com' , 'Male', Date('1998-02-27'), 'Myanmar') ON CONFLICT(id) DO NOTHING;
+
+# This CONFLICT (parameter) must have unique constraint 
+
+# Update table row 
+UPDATE person SET gender = 'Male' WHERE id = 1;
+
+# If Conflict data insert into table but want to change data overwritten, ON CONFLICT()
+INSERT INTO person values( 6, 'hello', 'tls' , 'tls@gmail.com' , 'Male', Date('1998-02-27'), 'Myanmar') 
+ON CONFLICT(id) DO UPDATE SET email = EXCLUDED.email, first_name = EXCLUDED.first_name ;
+
+# Set Foreign Key on parent table
+create table car (
+	id BIGSERIAL NOT NULL PRIMARY KEY,
+	make VARCHAR(50) NOT NULL,
+	model VARCHAR(50) NOT NULL,
+	price INT NOT NULL
+);
+
+create table person (
+	id INT NOT NULL PRIMARY KEY,
+	first_name VARCHAR(50) NOT NULL,
+	last_name VARCHAR(50) NOT NULL,
+	email VARCHAR(50),
+	gender VARCHAR(50) NOT NULL,
+	date_of_birth DATE NOT NULL,
+	country_of_birth VARCHAR(50) NOT NULL,
+	car_id BIGINT REFERENCES car (id) , UNIQUE(car_id)
+);
+
+# Inner Join on Two Table
+SELECT first_name , car.make , car.model FROM person JOIN car ON car_id = car.id;
+
+# Inner is the ဘုံပါ သော data သာ ပြသည်
+
+# Left Join is ဘယ်ဘက် table က data တွေ ပါ ပြပါတယ်
+SELECT * FROM person LEFT JOIN car ON car_id = car.id;
+
+SELECT * FROM person LEFT JOIN car ON car_id = car.id WHERE car.* IS NULL;
+
+SELECT * FROM person LEFT JOIN car ON car.id = car_id WHERE car.id = 2;
+
+# Find data when null 
+SELECT * FROM PERSON WHERE car_id IS NULL;
+
+# postgre sql Copy to csv file
+\copy (SELECT * FROM person LEFT JOIN car ON car.id = car_id) TO '/tmp/Postgre/result.csv' DELIMITER ',' CSV HEADER;
+
+# Note you must be folder permission have exclude when you want to \copy or \i
+
+# can restart sequence 
+ALTER SEQUENCE car_id_seq RESTART WITH 9;
+
+SELECT * FROM car_id_seq;
+
+# sequence add value to nextval('car_id_seq'::regclass)
+SELECT nextval('car_id_seq'::regclass);
+
+# page available extension
+SELECT * FROM pg_available_extensions;
+
+# UUID GENERATE 
+SELECT uuid_generate_v4();
+
+gen_random_uuid (); # This work well using
+
+# UUID install
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
